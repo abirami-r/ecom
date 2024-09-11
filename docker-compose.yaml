@@ -1,0 +1,40 @@
+version: '3.9'
+services:
+  postgres:
+    extends:
+      file: db/docker-compose.yml
+      service: postgres
+  migrations:
+    extends:
+      file: db/docker-compose.yml
+      service: migrations
+  pgadmin:
+    extends:
+      file: db/docker-compose.yml
+      service: pgadmin
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - 5672:5672
+      - 15672:15672
+    # volumes:
+    #   - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+    #   - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+      - k8scommerce
+
+  imaginary:
+    container_name: imaginary
+    image: h2non/imaginary
+    ports:
+      - "8088:8088"
+    environment:
+      - PORT=8088
+    command: -concurrency 50 -enable-url-source
+
+networks:
+  k8scommerce:
+    driver: bridge
